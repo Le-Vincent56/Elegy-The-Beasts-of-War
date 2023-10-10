@@ -1,0 +1,12 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Elegy.Grid
+{
+    public class Node
+    {
+        public bool passable;
+        public GridObject gridObject;
+    }
+}
