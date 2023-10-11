@@ -8,5 +8,7 @@ namespace Elegy.Grid
     {
         public bool passable;
         public GridObject gridObject;
+        public float elevation;
+        public bool selected;
     }
 }
