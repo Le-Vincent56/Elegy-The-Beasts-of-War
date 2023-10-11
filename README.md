@@ -1,5 +1,5 @@
 # Elegy-The-Beasts-of-War
-_ _Elegy: The Beasts of War_ _ is a topdown, tactical RPG inspired by games like _ _Fire Emblem: Awakening_ _ and _ _Symphony of War: The Nephilim Saga_ _. With a heavy emphasis on narrative, and a difficulty curve meant for more extreme tactical players, _ _Elegy: The Beasts of War_ _ uses the guise of dark fantasy to attempt to make sense of the villainy of war and its many, **many** consequences. Customize the classes of your unlikely team, battle your way through fantastical skirmishes, and make the difficult choices only a great leader could make. The songs only cease for the dead.
+_Elegy: The Beasts of War_ is a topdown, tactical RPG inspired by games like _Fire Emblem: Awakening_ and _Symphony of War: The Nephilim Saga_. With a heavy emphasis on narrative, and a difficulty curve meant for more extreme tactical players, _Elegy: The Beasts of War_ uses the guise of dark fantasy to attempt to make sense of the villainy of war and its many, **many** consequences. Customize the classes of your unlikely team, battle your way through fantastical skirmishes, and make the difficult choices only a great leader could make. The songs only cease for the dead.
 
 ## Design Pillars
 ### Tactical
