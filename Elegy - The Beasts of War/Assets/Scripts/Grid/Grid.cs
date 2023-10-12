@@ -3,21 +3,34 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Elegy.Characters;
+using UnityEditor;
 
 namespace Elegy.Grid
 {
     public class Grid : MonoBehaviour
     {
-        private Node[,] grid;
+        [SerializeField] private GameEvent onInitializeGridMesh;
+        [SerializeField] private GameObject gridNodePrefab;
+        [SerializeField] private GameObject gridHighlightObject;
+        private List<GameObject> gridHighlights = new List<GameObject>();
+        private Color walkableColor = new Color(0, 0, 0.6f, 0.6f);
+        private Color unwalkableColor = new Color(0.6f, 0, 0, 0.6f);
+        public Node[,] grid;
         public int width;
         public int length;
-        [SerializeField] private float cellSize;
+        public float cellSize;
         [SerializeField] private LayerMask terrainLayer;
         [SerializeField] private LayerMask obstacleLayer;
 
         private void Awake()
         {
             GenerateGrid();
+        }
+
+        private void Start()
+        {
+            // Create Grid Node Overlay
+            CreateGridNodeOverlays();
         }
 
         /// <summary>
@@ -42,6 +55,103 @@ namespace Elegy.Grid
 
             // Check terrain
             CheckPassableTerrain();
+
+            onInitializeGridMesh.Raise(this, this);
+        }
+
+        private void CreateGridNodeOverlays()
+        {
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < length; y++)
+                {
+                    if (grid[x, y].passable)
+                    {
+                        Vector3 worldPosition = GetWorldPosition(x, y, true);
+
+                        // Cast a ray to the terrain to determine the correct elevation
+                        RaycastHit hit;
+                        if (Physics.Raycast(worldPosition + Vector3.up * 100f, Vector3.down, out hit, float.MaxValue, terrainLayer))
+                        {
+                            // Create an instance of the Grid Node Prefab
+                            GameObject gridNode = Instantiate(gridNodePrefab, hit.point, Quaternion.Euler(90f, 0f, 0f));
+
+                            MeshFilter gridNodeMeshFilter = gridNode.GetComponent<MeshFilter>();
+                            Mesh gridNodeMesh = gridNodeMeshFilter.mesh;
+                            Vector3[] originalVertices = gridNodeMesh.vertices;
+
+                            RaycastHit terrainHit;
+                            if (Physics.Raycast(worldPosition + Vector3.up * 100f, Vector3.down, out terrainHit, float.MaxValue, terrainLayer))
+                            {
+                                // Calculate the new elevation
+                                float newElevation = hit.point.y;
+
+                                // Adjust the vertices of the mesh to match the terrain elevation
+                                Vector3[] updatedVertices = originalVertices.Clone() as Vector3[];
+                                for (int i = 0; i < updatedVertices.Length; i++)
+                                {
+                                    updatedVertices[i].y += newElevation - worldPosition.y;
+                                }
+
+                                // Apply the updated vertices to the mesh
+                                gridNodeMesh.vertices = updatedVertices;
+                                gridNodeMesh.RecalculateNormals();
+                                gridNodeMesh.RecalculateBounds();
+
+                                // Ensure the mesh collider is updated if you're using one
+                                MeshCollider meshCollider = gridNode.GetComponent<MeshCollider>();
+                                if (meshCollider != null)
+                                {
+                                    meshCollider.sharedMesh = gridNodeMesh;
+                                }
+                            }
+
+                            // Set the color of the grid node overlay based on some criteria
+                            Color color = grid[x, y].walkable ? walkableColor : unwalkableColor;
+                            gridNode.GetComponent<Renderer>().material.color = color;
+
+                            // Set to invisible
+                            gridNode.GetComponent<MeshRenderer>().enabled = false;
+
+                            // You may want to parent the grid nodes to an empty GameObject for organization
+                            gridNode.transform.parent = gridHighlightObject.transform;
+                            gridNode.transform.position += new Vector3(0f, 0.1f, 0f);
+
+                            // Optionally, store a reference to the grid node in your grid for later manipulation
+                            grid[x, y].gridNode = gridNode;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void UpdateGridHighlight()
+        {
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < length; y++)
+                {
+                    if (grid[x, y].gridNode != null)
+                    {
+                        Color color = grid[x, y].walkable ? walkableColor : unwalkableColor;
+                        grid[x, y].gridNode.GetComponent<Renderer>().material.color = color;
+                    }
+                }
+            }
+        }
+
+        public void ToggleGridHighlight(bool highlightOn)
+        {
+            for(int x = 0; x < width; x++)
+            {
+                for(int y = 0; y < length; y++)
+                {
+                    if (grid[x, y].gridNode != null)
+                    {
+                        grid[x, y].gridNode.gameObject.GetComponent<MeshRenderer>().enabled = highlightOn;
+                    }
+                }
+            }
         }
 
         /// <summary>

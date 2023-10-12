@@ -7,7 +7,7 @@ namespace Elegy.Characters
     public class Character : MonoBehaviour
     {
         public string characterName;
-        
+        public float movementPoints;
     }
 
 }

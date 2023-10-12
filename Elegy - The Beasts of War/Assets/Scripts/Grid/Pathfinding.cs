@@ -62,6 +62,90 @@ namespace Elegy.Grid
             }
         }
 
+        public void CalculateWalkableNodes(int startX, int startY, float range, ref List<PathNode> toHighlight)
+        {
+            PathNode startNode = pathNodes[startX, startY];
+
+            List<PathNode> openList = new List<PathNode>();
+            List<PathNode> closedList = new List<PathNode>();
+
+            openList.Add(startNode);
+
+            while(openList.Count > 0)
+            {
+                PathNode currentNode = openList[0];
+
+                openList.Remove(currentNode);
+                closedList.Add(currentNode);
+
+                // Find neighbor nodes in a 3x3 around the current node
+                List<PathNode> neighborNodes = new List<PathNode>();
+                for (int x = -1; x < 2; x++)
+                {
+                    for (int y = -1; y < 2; y++)
+                    {
+                        // Ignore the current node at (0, 0)
+                        if (x == 0 && y == 0)
+                        {
+                            continue;
+                        }
+
+                        // Ignore any nodes outside of the grid bounds
+                        if (!grid.CheckBounds(new Vector2Int(currentNode.xPos + x, currentNode.yPos + y)))
+                        {
+                            continue;
+                        }
+
+                        // State the node as a neighbor
+                        neighborNodes.Add(pathNodes[currentNode.xPos + x, currentNode.yPos + y]);
+                    }
+                }
+
+                for (int i = 0; i < neighborNodes.Count; i++)
+                {
+                    // If the closed list already contains the neighbor node, ignore it
+                    if (closedList.Contains(neighborNodes[i]))
+                    {
+                        continue;
+                    }
+
+                    // If the node is unpassable, then ignore it
+                    if (!grid.CheckPassable(neighborNodes[i].xPos, neighborNodes[i].yPos))
+                    {
+                        continue;
+                    }
+
+                    float movementCost = currentNode.gValue + CalculateDistance(currentNode, neighborNodes[i]);
+
+                    // If the movement cost is greater than the range, then continue
+                    if(movementCost > range) {
+                        continue;
+                    }
+
+                    if (!openList.Contains(neighborNodes[i]) || movementCost < neighborNodes[i].gValue)
+                    {
+                        // Set the neighbor nodes gValue to the movement cost
+                        neighborNodes[i].gValue = movementCost;
+
+                        // Set the neighbor node's parentNode to the current node
+                        neighborNodes[i].parentNode = currentNode;
+
+                        // If the open list doesn't contain the neighbor node, then add it
+                        if (!openList.Contains(neighborNodes[i]))
+                        {
+                            openList.Add(neighborNodes[i]);
+                        }
+                    }
+                }
+            }
+
+            // Add the closedd list to toHighlight
+            if(toHighlight != null)
+            {
+                toHighlight.AddRange(closedList);
+            }
+        }
+
         /// <summary>
         /// Find the path from a start (x, y) position to an end (x, y) position
         /// </summary>

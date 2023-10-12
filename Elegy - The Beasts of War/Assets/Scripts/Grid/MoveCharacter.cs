@@ -1,8 +1,9 @@
-using Elegy.Events;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Elegy.Events;
+using Elegy.Characters;
 
 namespace Elegy.Grid
 {
@@ -21,6 +22,7 @@ namespace Elegy.Grid
     {
         [SerializeField] private GameEvent onMoveCharacter;
         [SerializeField] private GameEvent onGridClicked;
+        [SerializeField] private GameEvent onCheckWalkableTerrain;
         [SerializeField] private LayerMask terrainLayerMask;
 
         [SerializeField] private GridObject targetCharacter;

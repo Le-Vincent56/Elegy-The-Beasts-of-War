@@ -10,14 +10,23 @@ using Elegy.Characters;
 namespace Elegy.Grid
 {
     [RequireComponent(typeof(Grid))]
+    [RequireComponent(typeof(Pathfinding))]
     public class GridControl : MonoBehaviour
     {
         [SerializeField] private GameEvent onGridHover;
         [SerializeField] private GameEvent onSetTargetCharacter;
+
         [SerializeField] private Grid targetGrid;
+        [SerializeField] private Pathfinding pathfinding;
         [SerializeField] private LayerMask terrainLayerMask;
         [SerializeField] private GridObject hoveringOver;
         [SerializeField] private SelectableGridObject selectedObj;
+
+        private void Start()
+        {
+            targetGrid = GetComponent<Grid>();
+            pathfinding = GetComponent<Pathfinding>();
+        }
 
         private void Update()
         {
@@ -46,6 +55,35 @@ namespace Elegy.Grid
             }
         }
 
+        public void CheckWalkableTerrain()
+        {
+            List<PathNode> walkableNodes = new List<PathNode>();
+            pathfinding.CalculateWalkableNodes(
+                selectedObj.GetComponent<GridObject>().gridPos.x,
+                selectedObj.GetComponent<GridObject>().gridPos.y,
+                selectedObj.GetComponent<Character>().movementPoints,
+                ref walkableNodes);
+
+            for(int x = 0; x < targetGrid.width; x++)
+            {
+                for (int y = 0; y < targetGrid.length; y++)
+                {
+                    for(int i = 0; i < walkableNodes.Count; i++)
+                    {
+                        if (walkableNodes[i].xPos == x && walkableNodes[i].yPos == y)
+                        {
+                            targetGrid.grid[x, y].walkable = true;
+                        } else
+                        {
+                            targetGrid.grid[x, y].walkable = false;
+                        }
+                    }
+                }
+            }
+
+            targetGrid.UpdateGridHighlight();
+        }
+
         /// <summary>
         /// Select a selectable object when clicked
         /// </summary>
@@ -60,11 +98,15 @@ namespace Elegy.Grid
                 }
 
                 selectedObj = hoveringOver.GetComponent<SelectableGridObject>();
+                CheckWalkableTerrain();
 
                 // If the object can be selected, send this character to be selected
-                if(selectedObj != null)
+                if (selectedObj != null)
                 {
                     onSetTargetCharacter.Raise(this, hoveringOver);
+
+                    // Activate the grid mesh
+                    targetGrid.ToggleGridHighlight(true);
                 }
             }
         }
@@ -82,8 +124,12 @@ namespace Elegy.Grid
                     return;
                 }
 
+                // Deselect the object
                 selectedObj = null;
                 onSetTargetCharacter.Raise(this, null);
+
+                // Set the grid mesh to be invisible
+                targetGrid.ToggleGridHighlight(false);
             }
         }
     }
