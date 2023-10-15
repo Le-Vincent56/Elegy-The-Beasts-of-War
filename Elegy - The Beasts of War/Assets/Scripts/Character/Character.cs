@@ -8,6 +8,7 @@ namespace Elegy.Characters
     {
         public string characterName;
         public float movementPoints;
+        public int attackRange;
     }
 
 }

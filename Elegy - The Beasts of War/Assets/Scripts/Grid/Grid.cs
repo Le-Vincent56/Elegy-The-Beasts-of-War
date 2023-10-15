@@ -188,6 +188,27 @@ namespace Elegy.Grid
         }
 
         /// <summary>
+        /// Check if a coordinate position is within bounds
+        /// </summary>
+        /// <param name="x">The x-value of the grid coordinate</param>
+        /// <param name="y">The y-value of the grid coordinate</param>
+        /// <returns>True if the position is within the grid, false otherwise</returns>
+        public bool CheckBounds(int x, int y)
+        {
+            if (x < 0 || x >= length)
+            {
+                return false;
+            }
+
+            if (y < 0 || y >= width)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Calculate the highest elevation of the node based on terrain
         /// </summary>
         private void CalculateElevation()
