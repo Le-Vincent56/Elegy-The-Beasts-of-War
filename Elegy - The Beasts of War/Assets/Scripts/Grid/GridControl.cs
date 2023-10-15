@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering;
 using Elegy.Events;
 using Elegy.Characters;
 
@@ -64,24 +63,23 @@ namespace Elegy.Grid
                 selectedObj.GetComponent<Character>().movementPoints,
                 ref walkableNodes);
 
-            for(int x = 0; x < targetGrid.width; x++)
+            List<Vector2Int> walkableTiles = new List<Vector2Int>();
+            for (int x = 0; x < targetGrid.width; x++)
             {
                 for (int y = 0; y < targetGrid.length; y++)
                 {
-                    for(int i = 0; i < walkableNodes.Count; i++)
+                    for (int i = 0; i < walkableNodes.Count; i++)
                     {
                         if (walkableNodes[i].xPos == x && walkableNodes[i].yPos == y)
                         {
-                            targetGrid.grid[x, y].walkable = true;
-                        } else
-                        {
-                            targetGrid.grid[x, y].walkable = false;
+                            walkableTiles.Add(new Vector2Int(x, y));
                         }
                     }
                 }
             }
 
-            targetGrid.UpdateGridHighlight();
+
+            targetGrid.UpdateGridHighlight(walkableTiles);
         }
 
         /// <summary>
@@ -99,6 +97,7 @@ namespace Elegy.Grid
 
                 selectedObj = hoveringOver.GetComponent<SelectableGridObject>();
                 CheckWalkableTerrain();
+
 
                 // If the object can be selected, send this character to be selected
                 if (selectedObj != null)

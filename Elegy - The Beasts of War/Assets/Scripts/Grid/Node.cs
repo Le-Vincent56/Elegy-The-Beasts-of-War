@@ -10,7 +10,7 @@ namespace Elegy.Grid
         public GridObject gridObject;
         public float elevation;
         public bool selected;
-        public bool walkable = false;
+        public bool walkable;
         public GameObject gridNode;
     }
 }

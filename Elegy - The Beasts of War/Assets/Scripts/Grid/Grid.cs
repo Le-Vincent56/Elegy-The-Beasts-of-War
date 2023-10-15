@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Elegy.Characters;
-using UnityEditor;
 
 namespace Elegy.Grid
 {
@@ -125,15 +124,29 @@ namespace Elegy.Grid
             }
         }
 
-        public void UpdateGridHighlight()
+        public void UpdateGridHighlight(List<Vector2Int> walkableTiles)
         {
+            foreach (Vector2Int pos in walkableTiles)
+            {
+                grid[pos.x, pos.y].walkable = true;
+            }
+
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < length; y++)
                 {
                     if (grid[x, y].gridNode != null)
                     {
-                        Color color = grid[x, y].walkable ? walkableColor : unwalkableColor;
+                        Color color;
+                        if (grid[x, y].walkable)
+                        {
+                            color = walkableColor;
+                        }
+                        else
+                        {
+                            color = unwalkableColor;
+                        }
+
                         grid[x, y].gridNode.GetComponent<Renderer>().material.color = color;
                     }
                 }
